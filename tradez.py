@@ -18,7 +18,9 @@ import tkinter as tk
 import time
 #import schedule
 import sched
+import threading
 style.use("fivethirtyeight")        #can use any style available on https://tonysyu.github.io/raw_content/matplotlib-style-gallery/gallery.html
+ex = ""
 
 def main():
     #win = tk.Tk()
@@ -31,7 +33,10 @@ def main():
     #ef1 = tk.Entry()
     #ef1.grid(column =0, row =2)
     #win.mainloop()
+    #print("program begins with " + str(threading.active_count()) + "active threads")
+    beginThreads = threading.active_count()
     s = sched.scheduler(time.time,time.sleep)
+    #ex = ""
     print("Welcome to tradez.")
     symb = input("Enter the trade symbol of the stock you want to track:")
     data = getData(symb)
@@ -39,19 +44,36 @@ def main():
         symb = input("Enter the trade symbol of the stock you want to track:")
         data=getData(symb)
     displayData(data)
-    while True:
+    while (ex!="exit"):
+        #print("there are " + str(threading.active_count()) + "active threads")
+        if(threading.active_count()==beginThreads):
+            threading.Thread(target = endTask).start()
+        #print("ex is " + str(ex))
+        if(ex == "exit"):
+            break
         s.enter(60,1,refresh,(symb,))     #need comma after symb to make it 1 argument instead of #arg = #char
         s.run()
         print("update")
-    #data = schedule.every(5).seconds.do(getdata,symb)
-    #schedule.every(5).seconds.do(displayData,data)
+        
+        #ex = input("Type exit to stop tracking:");
     
-    #while True:
-     #   schedule.run_pending()
-      #  time.sleep(1)
+
+def endTask():
+    #time.sleep(10)
+    global ex 
+    ex = input("Type 'exit' to stop tracking:")
+    #print("You have input " + ex)
+    if ex == "exit":
+        ("Exiting application. Cya later hustla.")
+    return False
+    
+    
 def refresh(symb):
-    data = getData(symb)
-    displayData(data)
+    global ex
+    if ex != "exit":
+        data = getData(symb)
+    if ex != "exit":
+        displayData(data)
 
 def getData(symb):
     url = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + str(symb) + "&interval=1min&apikey=" + api_key;
