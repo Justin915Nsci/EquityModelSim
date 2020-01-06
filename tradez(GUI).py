@@ -18,7 +18,6 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg #, NavigationToolbar2TkAgg
 import tkinter as tk
 import time
-#import schedule
 import sched
 import threading
 style.use("fivethirtyeight")        #can use any style available on https://tonysyu.github.io/raw_content/matplotlib-style-gallery/gallery.html
@@ -43,7 +42,7 @@ class App(tk.Tk):
         #label_2 = tk.Label(text = str(symb))
         #label_2.grid(column = 0, row =4)
         self.matPlotCanvas(symb)
-        self.after(10000,lambda: self.update(symb,0))
+        self.after(10000,lambda: self.update(symb,1))
         #threading.Thread(target = self.update(symb,)).start()
    
         
@@ -52,25 +51,27 @@ class App(tk.Tk):
         data = getData(symb)
         data = processData(data)
         
-        fig = Figure(figsize=(6,6),dpi=100)
-        a = fig.add_subplot(111)
+        fig = Figure(figsize=(6,5),dpi=100)
+        a = fig.add_subplot(111,xlabel = "Time",ylabel = "Price")
         
         #data['5min'].plot()
         #data['close'].plot()
         a.plot(data['5min'])
         a.plot(data['close'])
+        fig.legend(loc = "lower left")
+        fig.set_label("price")
         canvas = FigureCanvasTkAgg(fig,master=self)
         canvas.draw()
         canvas.get_tk_widget().grid(column =0, row = 4)
+        fig.tight_layout()
         #tk.Frame.pack(f)
     
   
     def update(self,symb,i):
         self.matPlotCanvas(symb)
-        self.say = tk.Label(text = str(i))
+        self.say = tk.Label(text = ("Times updated:" + str(i)))
         self.say.grid(column = 0, row =5)
         self.after(10000,lambda: self.update(symb,i+1))
-        #self.after(10000,lambda: self.update("AMZN",i+1))
             
             
     
@@ -97,7 +98,6 @@ def tradez():
     data = processData(data)
     displayData(data)
     while (ex!="exit"):
-        #print("there are " + str(threading.active_count()) + "active threads")
         if(threading.active_count()==beginThreads):
             threading.Thread(target = endTask).start()
         #print("ex is " + str(ex))
@@ -110,10 +110,8 @@ def tradez():
         #ex = input("Type exit to stop tracking:");
 
 def endTask():
-    #time.sleep(10)
     global ex 
     ex = input("Type 'exit' to stop tracking:")
-    #print("You have input " + ex)
     if ex == "exit":
         print("Exiting application, process may take up to 60 seconds. Cya later hustla.")
     return False
