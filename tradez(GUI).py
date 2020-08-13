@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Dec 31 14:07:37 2019
-
 @author: justi
 """
 
@@ -42,7 +41,7 @@ class App(tk.Tk):
         #label_2 = tk.Label(text = str(symb))
         #label_2.grid(column = 0, row =4)
         self.matPlotCanvas(symb)
-        self.after(60000,lambda: self.update(symb,1))
+        self.after(10000,lambda: self.update(symb,1))
         #threading.Thread(target = self.update(symb,)).start()
    
         
@@ -53,14 +52,17 @@ class App(tk.Tk):
         
         fig = Figure(figsize=(6,5),dpi=100)
         a = fig.add_subplot(111,xlabel = "Time",ylabel = "Price")
+        a.set_xticklabels([])
         
         #data['5min'].plot()
         #data['close'].plot()
+        #a.plot(data['15min'], label = "15min SMA")
+        a.plot(data['30min'], label = "30min SMA")
+        a.plot(data['90min'], label = "90min SMA")
         #a.plot(data['5min'])
-        a.plot(data['close'])
-        a.plot(data['30min'])
-        a.plot(data['300min'])
+        a.plot(data['close'], label = "close")
         fig.legend(loc = "lower left")
+    
         fig.set_label("price")
         canvas = FigureCanvasTkAgg(fig,master=self)
         canvas.draw()
@@ -73,7 +75,7 @@ class App(tk.Tk):
         self.matPlotCanvas(symb)
         self.say = tk.Label(text = ("Times updated:" + str(i)))
         self.say.grid(column = 0, row =5)
-        self.after(60000,lambda: self.update(symb,i+1))
+        self.after(10000,lambda: self.update(symb,i+1))
             
             
     
@@ -162,53 +164,25 @@ def processData(data):
         df.loc[-1,:] = data_row
         df.index = df.index +1          #for increasing which index of the df to print on
     data = df.sort_values('date')
+    data = data.truncate(before = len(df.index)-500);
+    #print(type(data));
     #print(df)
     data['close']=data['close'].astype(float)
     #data['5min'] = np.round(data['close'].rolling(window=5).mean(),2)
-   # data['20min'] = np.round(data['close'].rolling(window=20).mean(),2)
+    #data['15min'] = np.round(data['close'].rolling(window=15).mean(),2)
+    
     data['30min'] = np.round(data['close'].rolling(window=30).mean(),2)
-    #data['50min'] = np.round(data['close'].rolling(window=50).mean(),2)
-    data['300min']= np.round(data['close'].rolling(window=300,min_periods = 50).mean(),2)
+    data['90min'] = np.round(data['close'].rolling(window=90).mean(),2)
+    
     #print("data processed")
     return data
 
 def displayData(data):
-    #data['5min'].plot()
+    data['5min'].plot()
     data['close'].plot()
-    #data['20min'].plot()
-    data['30min'].plot()
-    #data['50min'].plot()
-    data['300min'].plot()
     plt.legend()
     plt.show()
     return True
 
-#Return -1 for sell, 1 for buy, 0 for no action
-def advise(data):
-    y1 = data['30min']
-    y2 = data['300min']
-    idx = np.argwhere(np.diff(np.sign(y1 - y2 )) != 0).reshape(-1)
-    #pts = []
-    #for i in range (0,len(idx),1):
-     #   if (len(idx)-i<10):
-      #      pts.append(i)
-    pt = idx[len(idx)-1]
-    if pt<1400:
-        return 0
-    val = y1.get(key = pt)
-    dt = val - y1.get(key = (pt-1))
-    
-    if dt>0:
-        print("Buy advised")
-        return 1
-    if dt<0:
-        print("Sell advised")
-        return -1
-    return 0
-        
-
 main()
-t#radez()
-#data=getData("BMO")
-#data = processData(data)
-#pts = advise(data)
+#tradez()
