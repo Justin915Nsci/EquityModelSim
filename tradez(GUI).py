@@ -57,10 +57,10 @@ class App(tk.Tk):
         #data['5min'].plot()
         #data['close'].plot()
         #a.plot(data['15min'], label = "15min SMA")
-        a.plot(data['30min'], label = "30min SMA")
-        a.plot(data['90min'], label = "90min SMA")
-        #a.plot(data['5min'])
         a.plot(data['close'], label = "close")
+        a.plot(data['90min'], label = "90min SMA")
+        a.plot(data['30min'], label = "30min SMA")
+        #a.plot(data['5min'])
         fig.legend(loc = "lower left")
     
         fig.set_label("price")
